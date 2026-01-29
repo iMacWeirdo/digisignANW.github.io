@@ -498,7 +498,7 @@
     <script>
         // Configuration - REPLACE WITH YOUR GOOGLE APPS SCRIPT WEB APP URL
         const CONFIG = {
-            apiUrl: 'https://script.google.com/macros/s/AKfycbwM17whoByML2v9hEP2oXH5w1HAT7JESdCiDDDFDY_Cm5vTAZe3JMVCv8bQJziFF-tmog/exec'
+            apiUrl: 'https://script.google.com/macros/s/AKfycbwaqfrQPY4QQ_tqKMIq00644_76O7miU8wanX6Sr-eoYrfOxWxsRZrEDOmWKxpQe4Ky6Q/exec'
         };
 
         let isAuthenticated = false;
@@ -735,10 +735,11 @@
             try {
                 const response = await fetch(`${CONFIG.apiUrl}?action=saveContent`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': sessionStorage.getItem('authToken')
-                    },
-                    body: JSON.stringify({ type, data })
+                    body: JSON.stringify({ 
+                        type, 
+                        data,
+                        authToken: sessionStorage.getItem('authToken')
+                    })
                 });
 
                 const result = await response.json();
@@ -747,11 +748,11 @@
                     await loadContent();
                     showMessage('globalMessage', 'Content saved successfully!', 'success');
                 } else {
-                    showMessage('globalMessage', 'Failed to save content', 'error');
+                    showMessage('globalMessage', result.error || 'Failed to save content', 'error');
                 }
             } catch (error) {
                 console.error('Save error:', error);
-                showMessage('globalMessage', 'Failed to save content', 'error');
+                showMessage('globalMessage', 'Failed to save content: ' + error.message, 'error');
             }
 
             showLoading(false);
@@ -766,10 +767,11 @@
             try {
                 const response = await fetch(`${CONFIG.apiUrl}?action=deleteContent`, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': sessionStorage.getItem('authToken')
-                    },
-                    body: JSON.stringify({ type, index })
+                    body: JSON.stringify({ 
+                        type, 
+                        index,
+                        authToken: sessionStorage.getItem('authToken')
+                    })
                 });
 
                 const result = await response.json();
@@ -778,11 +780,11 @@
                     await loadContent();
                     showMessage('globalMessage', 'Item deleted successfully!', 'success');
                 } else {
-                    showMessage('globalMessage', 'Failed to delete item', 'error');
+                    showMessage('globalMessage', result.error || 'Failed to delete item', 'error');
                 }
             } catch (error) {
                 console.error('Delete error:', error);
-                showMessage('globalMessage', 'Failed to delete item', 'error');
+                showMessage('globalMessage', 'Failed to delete item: ' + error.message, 'error');
             }
 
             showLoading(false);
