@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -152,6 +151,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            position: relative;
         }
 
         .ad-zone {
@@ -164,11 +164,19 @@
             align-items: center;
             justify-content: center;
             text-align: center;
-            transition: all 0.3s ease;
-            position: relative;
+            transition: opacity 0.5s ease-in-out;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
             overflow: hidden;
-            min-height: 180px;
-            flex: 1;
+            opacity: 0;
+        }
+
+        .ad-zone.active {
+            opacity: 1;
+            z-index: 1;
         }
 
         .ad-zone::before {
@@ -344,11 +352,14 @@
         const CONFIG = {
             apiUrl: 'https://script.google.com/macros/s/AKfycbwaqfrQPY4QQ_tqKMIq00644_76O7miU8wanX6Sr-eoYrfOxWxsRZrEDOmWKxpQe4Ky6Q/exec',
             refreshInterval: 60000, // Refresh content every 60 seconds
-            slideInterval: 5000 // Change slides every 5 seconds
+            slideInterval: 5000, // Change slides every 5 seconds
+            adInterval: 7000 // Change ads every 7 seconds
         };
 
         let currentSlide = 0;
+        let currentAd = 0;
         let slides = [];
+        let ads = [];
         let contentData = null;
 
         // Initialize
@@ -361,6 +372,10 @@
             
             if (slides.length > 0) {
                 setInterval(nextSlide, CONFIG.slideInterval);
+            }
+            
+            if (ads.length > 0) {
+                setInterval(nextAd, CONFIG.adInterval);
             }
         }
 
@@ -460,17 +475,31 @@
         }
 
         // Render Advertisements
-        function renderAds(ads) {
+        function renderAds(adsData) {
             const adSidebar = document.getElementById('adSidebar');
-            if (!ads || ads.length === 0) return;
+            if (!adsData || adsData.length === 0) return;
             
-            adSidebar.innerHTML = ads.map(ad => `
-                <div class="ad-zone">
+            ads = adsData;
+            adSidebar.innerHTML = ads.map((ad, index) => `
+                <div class="ad-zone ${index === 0 ? 'active' : ''}" data-index="${index}">
                     ${ad.image ? `<img src="${ad.image}" alt="${ad.title || 'Advertisement'}">` : ''}
                     ${ad.title ? `<div class="ad-title">${ad.title}</div>` : ''}
                     ${ad.text ? `<div class="ad-text">${ad.text}</div>` : ''}
                 </div>
             `).join('');
+            
+            currentAd = 0;
+        }
+
+        // Next Ad
+        function nextAd() {
+            if (ads.length === 0) return;
+            
+            const adElements = document.querySelectorAll('.ad-zone');
+            adElements[currentAd].classList.remove('active');
+            
+            currentAd = (currentAd + 1) % ads.length;
+            adElements[currentAd].classList.add('active');
         }
 
         // Render Footer
